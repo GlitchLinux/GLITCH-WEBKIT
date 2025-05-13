@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gLiTcH Linux Toolkit</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --background: #002b36;
+      --foreground: #839496;
+      --highlight: #2aa198;
+      --secondary: #073642;
+      --accent: #cb4b16;
+      --text: #eee8d5;
+      --header: #fdf6e3;
+      --success: #859900;
+      --warning: #b58900;
+      --danger: #dc322f;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Ubuntu', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: var(--background);
+      color: var(--foreground);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      background-color: var(--secondary);
+      color: var(--header);
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo {
+      width: 50px;
+      height: 50px;
+      margin-right: 15px;
+    }
+    
+    .title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    .subtitle {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    
+    .container {
+      display: flex;
+      flex: 1;
+    }
+    
+    .sidebar {
+      width: 220px;
+      background-color: var(--secondary);
+      padding: 1rem;
+      overflow-y: auto;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .category {
+      margin-bottom: 20px;
+    }
+    
+    .category-title {
+      color: var(--header);
+      font-size: 1rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .category-title i {
+      margin-right: 8px;
+      color: var(--highlight);
+    }
+    
+    .category-item {
+      background: none;
+      border: none;
+      color: var(--text);
+      padding: 6px 10px;
+      margin: 2px 0;
+      font-size: 0.85rem;
+      text-align: left;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .category-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--highlight);
+    }
+    
+    .category-item i {
+      margin-right: 8px;
+      width: 16px;
+      text-align: center;
+    }
+    
+    .content {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .search {
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    
+    .search input {
+      width: 100%;
+      padding: 10px 15px 10px 40px;
+      border-radius: 4px;
+      border: 1px solid var(--secondary);
+      background-color: var(--secondary);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+    
+    .search i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--foreground);
+    }
+    
+    .search input:focus {
+      outline: none;
+      border-color: var(--highlight);
+    }
+    
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .tool-card {
+      background-color: var(--secondary);
+      border-radius: 8px;
+      padding: 15px;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .tool-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .tool-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .tool-icon {
+      width: 30px;
+      height: 30px;
+      margin-right: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      color: var(--text);
+    }
+    
+    .python {
+      background-color: #3776ab;
+    }
+    
+    .bash {
+      background-color: #4eaa25;
+    }
+    
+    .executable {
+      background-color: var(--accent);
+    }
+    
+    .unknown {
+      background-color: var(--warning);
+    }
+    
+    .tool-name {
+      font-weight: bold;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    
+    .tool-description {
+      color: var(--foreground);
+      font-size: 0.8rem;
+      margin-bottom: 10px;
+    }
+    
+    .tool-type {
+      font-size: 0.7rem;
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 10px;
+      color: var(--text);
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .terminal {
+      flex: 1;
+      background-color: var(--secondary);
+      border-radius: 8px;
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      justify-content: space-between;
+    }
+    
+    .terminal-title {
+      display: flex;
+      align-items: center;
+    }
+    
+    .terminal-title i {
+      margin-right: 8px;
+      color: var(--highlight);
+    }
+    
+    .terminal-buttons {
+      display: flex;
+    }
+    
+    .btn {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 0.8rem;
+      padding: 5px 10px;
+      margin-left: 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .btn i {
+      margin-right: 5px;
+    }
+    
+    .btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn-primary {
+      background-color: var(--highlight);
+      color: var(--secondary);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--highlight);
+      opacity: 0.9;
+    }
+    
+    .btn-danger {
+      background-color: var(--danger);
+      color: var(--text);
+    }
+    
+    .btn-danger:hover {
+      background-color: var(--danger);
+      opacity: 0.9;
+    }
+    
+    .terminal-content {
+      flex: 1;
+      padding: 1rem;
+      font-family: 'Ubuntu Mono', monospace;
+      font-size: 0.9rem;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      color: var(--text);
+    }
+    
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background-color: var(--secondary);
+      color: var(--foreground);
+      font-size: 0.8rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+    }
+    
+    .status-item i {
+      margin-right: 5px;
+    }
+    
+    .running {
+      color: var(--success);
+    }
+    
+    .error {
+      color: var(--danger);
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-content {
+      background-color: var(--secondary);
+      width: 90%;
+      max-width: 600px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .modal-header {
+      background-color: var(--highlight);
+      color: var(--secondary);
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-header h3 {
+      font-size: 1.1rem;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--secondary);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    
+    .modal-body {
+      padding: 1rem;
+    }
+    
+    .modal-body p {
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    
+    .modal-footer {
+      padding: 1rem;
+      display: flex;
+      justify-content: flex-end;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        max-height: 200px;
+      }
+      
+      .tools-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--secondary);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--highlight);
+      border-radius: 4px;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    /* Tool categories */
+    .category-system { color: var(--success); }
+    .category-network { color: var(--highlight); }
+    .category-security { color: var(--warning); }
+    .category-install { color: var(--accent); }
+    .category-boot { color: var(--danger); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <img src="/static/alienarena.svg" alt="gLiTcH Linux Logo" class="logo">
+      <div>
+        <div class="title">gLiTcH Linux Toolkit</div>
+        <div class="subtitle">Open-source system management tools</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="btn" id="refresh-btn" title="Refresh Tools">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+      <button class="btn" id="system-info-btn" title="System Information">
+        <i class="fas fa-info-circle"></i>
+      </button>
+      <a href="https://github.com/GlitchLinux" target="_blank" class="btn" title="GitHub Repository">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+  </div>
+  
+  <div class="container">
+    <aside class="sidebar">
+      <div class="category">
+        <div class="category-title"><i class="fas fa-laptop"></i> System Tools</div>
+        <button class="category-item" data-filter="system-info.sh"><i class="fas fa-info-circle"></i> System Info</button>
+        <button class="category-item" data-filter="System-CleanUp.sh"><i class="fas fa-broom"></i> System Cleanup</button>
+        <button class="category-item" data-filter="auto-update.sh"><i class="fas fa-sync"></i> Auto Update</button>
+        <button class="category-item" data-filter="log-cleanup.sh"><i class="fas fa-file-alt"></i> Log Cleanup</button>
+        <button class="category-item" data-filter="system-monitor.sh"><i class="fas fa-chart-line"></i> System Monitor</button>
+      </div>
+
+      <div class="category">
+        <div class="category-title"><i class="fas fa-network-wired"></i> Network Tools</div>
+        <button class="category-item" data-filter="network-speed-test.sh"><i class="fas fa-tachometer-alt"></i> Speed Test</button>
+        <button class="category-item" data-filter="restart-network.sh"><i class="fas fa-sync"></i> Restart Network</button>
+        <button class="category-item" data-filter="port-scanner.sh"><i class="fas fa-search"></i> Port Scanner</button>
+        <button class="category-item" data-filter="vpn-setup.sh"><i class="fas fa-shield-alt"></i> VPN Setup</button>
+        <button class="category-item" data-filter="ssh-file-transfer.sh"><i class="fas fa-file-export"></i> SSH File Transfer</button>
+      </div>
+
+      <div class="category">
+        <div class="category-title"><i class="fas fa-shield-alt"></i> Security Tools</div>
+        <button class="category-item" data-filter="firewall-setup.sh"><i class="fas fa-fire"></i> Firewall Setup</button>
+        <button class="category-item" data-filter="password-generator.py"><i class="fas fa-key"></i> Password Generator</button>
+        <button class="category-item" data-filter="ssh-hardening.sh"><i class="fas fa-lock"></i> SSH Hardening</button>
+        <button class="category-item" data-filter="malware-scan.sh"><i class="fas fa-virus"></i> Malware Scan</button>
+        <button class="category-item" data-filter="ssh-guard.sh"><i class="fas fa-user-shield"></i> SSH Guard</button>
+      </div>
+
+      <div class="category">
+        <div class="category-title"><i class="fas fa-cube"></i> Container & VM Tools</div>
+        <button class="category-item" data-filter="docker-setup.sh"><i class="fab fa-docker"></i> Docker Setup</button>
+        <button class="category-item" data-filter="kvm-setup.sh"><i class="fas fa-server"></i> KVM Setup</button>
+        <button class="category-item" data-filter="lxc-container-setup.sh"><i class="fas fa-box"></i> LXC Setup</button>
+        <button class="category-item" data-filter="minideb-docker.sh"><i class="fas fa-box-open"></i> MiniDeb Docker</button>
+        <button class="category-item" data-filter="QEMU-QuickBoot.sh"><i class="fas fa-play"></i> QEMU QuickBoot</button>
+      </div>
+
+      <div class="category">
+        <div class="category-title"><i class="fas fa-hdd"></i> Storage Tools</div>
+        <button class="category-item" data-filter="VHD-Creator.sh"><i class="fas fa-compact-disc"></i> VHD Creator</button>
+        <button class="category-item" data-filter="squashfs_create.sh"><i class="fas fa-file-archive"></i> SquashFS Create</button>
+        <button class="category-item" data-filter="luks-encrypted-persistence.sh"><i class="fas fa-lock"></i> LUKS Encrypted</button>
+        <button class="category-item" data-filter="DD-GUI.py"><i class="fas fa-copy"></i> DD GUI</button>
+        <button class="category-item" data-filter="nas-mount.sh"><i class="fas fa-network-wired"></i> NAS Mount</button>
+      </div>
+    </aside>
+    
+    <main class="content">
+      <div class="search">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search tools..." id="search-input">
+      </div>
+      
+      <div class="tools-grid" id="tools-grid">
+        <!-- Tools will be populated dynamically -->
+      </div>
+      
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-title">
+            <i class="fas fa-terminal"></i>
+            <span id="current-tool">Terminal Output</span>
+          </div>
+          <div class="terminal-buttons">
+            <button class="btn" id="copy-output-btn" title="Copy Output">
+              <i class="fas fa-copy"></i>
+            </button>
+            <button class="btn" id="clear-terminal-btn" title="Clear Terminal">
+              <i class="fas fa-eraser"></i>
+            </button>
+            <button class="btn btn-danger" id="stop-execution-btn" title="Stop Execution" disabled>
+              <i class="fas fa-stop"></i> Stop
+            </button>
+            <button class="btn btn-primary" id="run-tool-btn" title="Run Selected Tool" disabled>
+              <i class="fas fa-play"></i> Run
+            </button>
+          </div>
+        </div>
+        <div class="terminal-content" id="terminal-output">Welcome to gLiTcH Linux Toolkit!
+Select a tool from the grid or sidebar to get started.</div>
+      </div>
+    </main>
+  </div>
+  
+  <div class="status-bar">
+    <div class="status-item">
+      <i class="fas fa-folder-open"></i>
+      <span id="toolkit-path">Loading path...</span>
+    </div>
+    <div class="status-item" id="status-indicator">
+      <i class="fas fa-circle"></i>
+      <span>Ready</span>
+    </div>
+  </div>
+  
+  <div class="modal" id="confirm-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Confirmation</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message">Are you sure you want to run this tool?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="cancel-btn">Cancel</button>
+        <button class="btn btn-primary" id="confirm-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="system-info-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>System Information</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="system-info-content">Loading system information...</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary modal-close">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Variables
+      let tools = [];
+      let selectedTool = null;
+      
+      // DOM Elements
+      const toolsGrid = document.getElementById('tools-grid');
+      const searchInput = document.getElementById('search-input');
+      const terminalOutput = document.getElementById('terminal-output');
+      const currentToolName = document.getElementById('current-tool');
+      const runToolBtn = document.getElementById('run-tool-btn');
+      const stopExecutionBtn = document.getElementById('stop-execution-btn');
+      const clearTerminalBtn = document.getElementById('clear-terminal-btn');
+      const copyOutputBtn = document.getElementById('copy-output-btn');
+      const refreshBtn = document.getElementById('refresh-btn');
+      const toolkitPathEl = document.getElementById('toolkit-path');
+      const statusIndicator = document.getElementById('status-indicator');
+      const confirmModal = document.getElementById('confirm-modal');
+      const confirmMessage = document.getElementById('confirm-message');
+      const confirmBtn = document.getElementById('confirm-btn');
+      const cancelBtn = document.getElementById('cancel-btn');
+      const modalCloseButtons = document.querySelectorAll('.modal-close');
+      const systemInfoBtn = document.getElementById('system-info-btn');
+      const systemInfoModal = document.getElementById('system-info-modal');
+      const systemInfoContent = document.getElementById('system-info-content');
+      
+      // Fetch tools data
+      function fetchTools() {
+        setStatus('loading', 'Loading tools...');
+        toolsGrid.innerHTML = '<div class="loading">Loading tools...</div>';
+        
+        // This will be replaced by your actual endpoint
+        fetch('/')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.text();
+          })
+          .then(html => {
+            try {
+              // Extract the JSON data from the HTML response
+              // This is a workaround since we're not using an API endpoint
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(html, 'text/html');
+              
+              // Try to find tools data that was embedded in the HTML
+              const scriptElements = doc.querySelectorAll('script');
+              let toolsData = [];
+              
+              for (const script of scriptElements) {
+                if (script.textContent.includes('tools =')) {
+                  try {
+                    // Extract tools array from script content
+                    const match = script.textContent.match(/tools\s*=\s*(\[.*?\])/s);
+                    if (match && match[1]) {
+                      toolsData = JSON.parse(match[1]);
+                      break;
+                    }
+                  } catch (e) {
+                    console.error('Error parsing embedded tools data:', e);
+                  }
+                }
+              }
+              
+              if (toolsData.length === 0) {
+                // If we couldn't find embedded data, create mock data based on file list
+                const fileNames = [
+                  'autologin-headless-system.sh', 'autologin-xfce.sh', 'auto-update.sh',
+                  'Boot-Repair.sh', 'Brave-Browser-Install.sh', 'Chroot-setup.sh',
+                  'crypto-tools.sh', 'DD-CLI.py', 'DD-GUI.py', 'Debian-XFCE-Debloat.sh',
+                  'Debootstrap-Minimal-LUKS.sh', 'Debootstrap-Minimal.sh', 'directory-file-listing.sh',
+                  'docker-setup.sh', 'fastfetch-install.sh', 'firefox-esr-purge.sh',
+                  'firewall-setup.sh', 'Flatpak-Install.sh', 'gLiTcH-ISO-Create.sh',
+                  'GRUB-gLiTcH-Theme.sh', 'hardware-test.sh', 'icon-pack-installer.sh',
+                  'kernel-update.sh', 'Keyboard-Language-Config.sh', 'kvm-setup.sh',
+                  'log-cleanup.sh', 'luks-encrypted-persistence.sh', 'lxc-container-setup.sh',
+                  'malware-scan.sh', 'minideb-docker.sh', 'missing-locales-fix.sh',
+                  'MultiBoot-OS-QEMU-VM.sh', 'NaLa-APT.sh', 'nas-mount.sh',
+                  'NetBoot-xyz-GRUB-Boot.sh', 'network-speed-test.sh', 'password-generator.py',
+                  'port-scanner.sh', 'python-env-setup.sh', 'QEMU-QuickBoot.sh',
+                  'Remote-LUKS-Vault-Manager.sh', 'restart-network.sh', 'rsync_GUI.sh',
+                  'squashfs_create.sh', 'ssh-file-transfer.sh', 'ssh-guard.sh',
+                  'ssh-hardening.sh', 'Systemback-2.0-Install.sh', 'System-CleanUp.sh',
+                  'system-info.sh', 'system-monitor.sh', 'theme-installer.sh',
+                  'Torbrowser-Launcher.sh', 'VHD-Creator.sh', 'Virtualbox_Debian.sh',
+                  'vpn-setup.sh'
+                ];
+                
+                toolsData = fileNames.map(name => {
+                  const type = name.endsWith('.py') ? 'python' : 'bash';
+                  return {
+                    name: name,
+                    path: `/home/x/glitch-webkit/gLiTcH-ToolKit/${name}`,
+                    type: type,
+                    description: getToolDescription(name)
+                  };
+                });
+              }
+              
+              tools = toolsData;
+              renderTools(tools);
+              setStatus('ready', 'Ready');
+              
+              // Also update the toolkit path
+              toolkitPathEl.textContent = '/home/x/glitch-webkit/gLiTcH-ToolKit/';
+            } catch (error) {
+              console.error('Error parsing response:', error);
+              setStatus('error', 'Error loading tools');
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching tools:', error);
+            setStatus('error', 'Connection error');
+          });
+      }
+      
+      // Helper function to get description for tools
+      function getToolDescription(name) {
+        const descriptions = {
+          'system-info.sh': 'Display detailed system information',
+          'System-CleanUp.sh': 'Clean up temporary files and free disk space',
+          'auto-update.sh': 'Automatically update system packages',
+          'log-cleanup.sh': 'Clean up and rotate system log files',
+          'vpn-setup.sh': 'Configure and setup VPN connections',
+          'network-speed-test.sh': 'Test network connection speed',
+          'restart-network.sh': 'Restart network services',
+          'port-scanner.sh': 'Scan for open ports on local or remote systems',
+          'ssh-file-transfer.sh': 'Transfer files securely using SSH',
+          'firewall-setup.sh': 'Configure system firewall rules',
+          'password-generator.py': 'Generate secure random passwords',
+          'ssh-hardening.sh': 'Enhance SSH security configurations',
+          'malware-scan.sh': 'Scan system for malware and security threats',
+          'ssh-guard.sh': 'Protect SSH from brute force attacks',
+          'Boot-Repair.sh': 'Fix boot loader issues',
+          'docker-setup.sh': 'Install and configure Docker',
+          'kvm-setup.sh': 'Setup KVM virtualization',
+          'lxc-container-setup.sh': 'Configure LXC containers',
+          'minideb-docker.sh': 'Create minimal Debian Docker containers',
+          'QEMU-QuickBoot.sh': 'Quickly boot VMs with QEMU',
+          'VHD-Creator.sh': 'Create virtual hard disk images',
+          'squashfs_create.sh': 'Create compressed SquashFS filesystems',
+          'luks-encrypted-persistence.sh': 'Set up encrypted persistent storage',
+          'DD-GUI.py': 'Graphical interface for disk imaging',
+          'nas-mount.sh': 'Mount network attached storage',
+          'Brave-Browser-Install.sh': 'Install Brave web browser',
+          'Debian-XFCE-Debloat.sh': 'Remove unnecessary packages from XFCE',
+          'theme-installer.sh': 'Install desktop themes',
+          'system-monitor.sh': 'Monitor system resources',
+          'MultiBoot-OS-QEMU-VM.sh': 'Create multi-boot VM images',
+          'gLiTcH-ISO-Create.sh': 'Create custom Linux ISO images',
+          'GRUB-gLiTcH-Theme.sh': 'Install custom GRUB theme',
+          'Keyboard-Language-Config.sh': 'Configure keyboard layouts',
+          'Torbrowser-Launcher.sh': 'Install Tor Browser',
+          'Virtualbox_Debian.sh': 'Install VirtualBox on Debian',
+          'fastfetch-install.sh': 'Install system information display tool'
+        };
+        
+        // Return description if exists, otherwise generic description based on filename
+        return descriptions[name] || name.replace(/[-_.]/g, ' ')
+                                         .replace(/.sh$|.py$/, '')
+                                         .replace(/([A-Z])/g, ' $1')
+                                         .trim();
+      }
+      
+      // Render tools
